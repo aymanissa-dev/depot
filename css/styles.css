@@ -95,29 +95,61 @@ body.nav-open { overflow: hidden; }
 .hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .hero-stage {
   position: relative; z-index: 1; height: 100%;
-  display: grid; place-items: center; align-content: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.85rem;
+  padding: calc(4.25rem + env(safe-area-inset-top)) 1.25rem 2.75rem;
   pointer-events: none;
 }
-.hero-name { margin: 0 0 0.4rem; }
+.hero-name { margin: 0; text-align: center; position: relative; z-index: 2; }
 .hero-name-line {
   display: block;
   font-family: var(--display);
-  font-size: clamp(1.15rem, 2vw, 1.7rem);
+  font-size: 0.95rem;
   font-weight: 500;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
-.hero-portrait { margin: 0; width: min(38vw, 380px); }
+.js:not(.reduce) .hero-name,
+.js:not(.reduce) .hero-role {
+  opacity: 0;
+  animation: hero-in 1s var(--ease) 0.15s forwards;
+}
+.js:not(.reduce) .hero-role { animation-delay: 0.35s; }
+@keyframes hero-in { to { opacity: 1; } }
+.hero-portrait {
+  margin: 0;
+  width: min(88vw, calc((100dvh - 11rem) * 0.685), 480px);
+  flex: 0 1 auto;
+  min-height: 0;
+}
+.hero-portrait-tilt, .hero-portrait picture { display: block; width: 100%; }
 .hero-portrait img {
-  display: block; width: 100%; height: auto;
+  display: block;
+  width: 100%;
+  height: auto;
   aspect-ratio: 432 / 631;
   object-fit: contain;
 }
 .hero-role {
-  margin: 0.55rem 0 0;
+  margin: 0.7rem 0 0;
   font-size: 0.92rem;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.01em;
   color: var(--soft);
+  text-align: center;
+}
+.scroll-cue {
+  position: absolute; left: 50%; bottom: 0.85rem; z-index: 2;
+  width: 44px; height: 44px; transform: translateX(-50%);
+  display: grid; place-items: end center;
+}
+.scroll-cue span[aria-hidden] {
+  display: block; width: 1px; height: 28px; background: var(--ink); transform-origin: top;
+}
+.js:not(.reduce) .scroll-cue span[aria-hidden] { animation: cue 1.8s var(--ease) infinite; }
+@keyframes cue {
+  0% { transform: scaleY(0.2); opacity: 0.3; }
+  50% { transform: scaleY(1); opacity: 1; }
+  100% { transform: scaleY(0.2); opacity: 0.3; }
 }
 
 .block { padding: clamp(3.2rem, 8vh, 5.5rem) 0; border-top: 1px solid var(--line); }
@@ -212,7 +244,8 @@ body.nav-open { overflow: hidden; }
   .js #primary-nav.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
   .js #primary-nav .nav-list { flex-direction: column; text-align: center; gap: 0.4rem; }
   .js #primary-nav .nav-list a { font-size: 1.35rem; min-height: 48px; display: inline-flex; align-items: center; }
-  .hero-portrait { width: min(72vw, 340px); }
+  .hero-stage { gap: 0.65rem; padding-bottom: 2.4rem; }
+  .hero-portrait { width: min(92vw, calc((100dvh - 9.5rem) * 0.685)); }
   .profile-grid, .soon-grid, .gh-stats { grid-template-columns: 1fr; }
   .actions, .btn { width: 100%; }
   .actions { flex-direction: column; }
@@ -222,7 +255,8 @@ body.nav-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .soon-frame, .repo-skel, .reveal { animation: none; opacity: 1; transform: none; }
-  .hero-canvas { display: none; }
+  .hero-canvas, .scroll-cue span[aria-hidden] { display: none; animation: none; }
+  .hero-name, .hero-role { opacity: 1; animation: none; }
 }
 
 @media (forced-colors: active) {
@@ -232,8 +266,9 @@ body.nav-open { overflow: hidden; }
 
 @media print {
   .site-header, .cursor, .hero-canvas, .nav-toggle, #print-cv, .soon-frame { display: none !important; }
-  .hero { height: auto; padding: 1rem 0; }
-  .hero-portrait { width: 180px; }
+  .hero { height: auto; min-height: 0; padding: 1rem 0; }
+  .hero-portrait { width: 180px; flex: none; }
+  .scroll-cue { display: none; }
   .block, .repo-card, .soon-card { break-inside: avoid; }
   a { text-decoration: underline; }
   body { background: #fff; }

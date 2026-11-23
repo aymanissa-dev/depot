@@ -16,56 +16,49 @@ export function createHeroScene(canvas, { lite = false } = {}) {
 
   renderer.setClearColor(0x000000, 0);
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 40);
-  camera.position.set(0, 0, 6.4);
+  const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 40);
+  camera.position.set(0, 0.1, 7.2);
 
   const rig = new THREE.Group();
   scene.add(rig);
 
-  const metal = new THREE.MeshStandardMaterial({
-    color: 0x2a2a28,
-    metalness: 0.82,
-    roughness: 0.22,
-    transparent: true,
-    opacity: 0.55,
-  });
   const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(1.55, lite ? 0.012 : 0.006, lite ? 8 : 16, lite ? 64 : 140),
-    metal
+    new THREE.TorusGeometry(1.85, lite ? 0.008 : 0.0045, lite ? 8 : 12, lite ? 80 : 160),
+    new THREE.MeshStandardMaterial({
+      color: 0x2c2c2a,
+      metalness: 0.72,
+      roughness: 0.28,
+      transparent: true,
+      opacity: 0.42,
+    })
   );
-  ring.rotation.x = 1.15;
+  ring.rotation.x = 1.25;
   rig.add(ring);
 
   let halo = null;
   if (!lite) {
     halo = new THREE.Mesh(
-      new THREE.TorusGeometry(2.05, 0.0035, 10, 120),
-      new THREE.MeshStandardMaterial({ color: 0xb9b4ac, metalness: 0.2, roughness: 0.65, transparent: true, opacity: 0.8 })
+      new THREE.TorusGeometry(2.45, 0.0022, 8, 140),
+      new THREE.MeshStandardMaterial({
+        color: 0xc8c3bb,
+        metalness: 0.15,
+        roughness: 0.7,
+        transparent: true,
+        opacity: 0.85,
+      })
     );
-    halo.rotation.x = 0.35;
+    halo.rotation.x = 0.55;
     rig.add(halo);
   }
 
-  const boxGeo = new THREE.BoxGeometry(0.16, 0.16, 0.16);
-  const boxMat = new THREE.MeshStandardMaterial({ color: 0xded8d0, roughness: 0.85, metalness: 0.05 });
-  const cubes = [];
-  const count = lite ? 4 : 9;
-  for (let i = 0; i < count; i += 1) {
-    const cube = new THREE.Mesh(boxGeo, boxMat);
-    const a = (i / count) * Math.PI * 2;
-    cube.position.set(Math.cos(a) * 2.15, Math.sin(a * 0.7) * 0.85, Math.sin(a) * 0.7);
-    cube.rotation.set(a, a * 0.4, 0);
-    cubes.push(cube);
-    rig.add(cube);
-  }
-
-  scene.add(new THREE.AmbientLight(0xffffff, 0.75));
-  const key = new THREE.DirectionalLight(0xffffff, 1.15);
-  key.position.set(3, 4, 5);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+  const key = new THREE.DirectionalLight(0xffffff, 1.05);
+  key.position.set(2.5, 3.5, 5);
   scene.add(key);
 
   const pointer = { x: 0, y: 0 };
   let progress = 0;
+  let intro = 1;
   const dprCap = lite ? 1.15 : 1.5;
 
   function resize() {
@@ -78,23 +71,22 @@ export function createHeroScene(canvas, { lite = false } = {}) {
   }
 
   function render(time) {
+    intro += (0 - intro) * 0.035;
     const t = time * 0.001;
-    ring.rotation.z = t * 0.18 + progress * 1.2;
-    ring.rotation.y = pointer.x * 0.45;
+    const settle = 1 - intro;
+    ring.rotation.z = t * 0.12 + progress * 0.9;
+    ring.rotation.y = pointer.x * 0.35;
     if (halo) {
-      halo.rotation.z = -t * 0.08 + progress * 0.6;
-      halo.rotation.x = 0.35 + pointer.y * 0.2;
+      halo.rotation.z = -t * 0.05 + progress * 0.45;
+      halo.rotation.x = 0.55 + pointer.y * 0.16;
     }
-    cubes.forEach((cube, i) => {
-      const a = t * 0.25 + (i / count) * Math.PI * 2;
-      cube.position.x = Math.cos(a) * (2.05 + pointer.x * 0.2);
-      cube.position.y = Math.sin(a * 0.85) * 0.9 + pointer.y * 0.15;
-      cube.rotation.x += 0.004;
-      cube.rotation.y += 0.006;
-    });
-    rig.rotation.y += (pointer.x * 0.28 - rig.rotation.y) * 0.06;
-    rig.rotation.x += (pointer.y * -0.16 - rig.rotation.x) * 0.06;
-    camera.position.z = 6.4 - progress * 0.8;
+    rig.rotation.y += (pointer.x * 0.22 - rig.rotation.y) * 0.05;
+    rig.rotation.x += (pointer.y * -0.12 - rig.rotation.x) * 0.05;
+    const scale = 0.86 + settle * 0.14 - progress * 0.08;
+    rig.scale.setScalar(Math.max(0.7, scale));
+    camera.position.z = 7.2 + progress * 1.1;
+    camera.position.x = pointer.x * 0.25;
+    camera.position.y = 0.1 + pointer.y * 0.12;
     camera.lookAt(0, 0, 0);
     renderer.render(scene, camera);
   }

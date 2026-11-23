@@ -7,6 +7,8 @@ const forced = window.matchMedia("(forced-colors: active)").matches;
 
 const nameLine = document.getElementById("name-line");
 const portraitTilt = document.getElementById("portrait-tilt");
+const heroStage = document.getElementById("hero-stage");
+const scrollCue = document.querySelector(".scroll-cue");
 const pointer = { x: 0, y: 0, sx: 0, sy: 0 };
 let progress = 0;
 let scene = null;
@@ -22,10 +24,12 @@ function loop(time) {
   frame = requestAnimationFrame(loop);
   pointer.sx += (pointer.x - pointer.sx) * 0.08;
   pointer.sy += (pointer.y - pointer.sy) * 0.08;
-  if (!reduce && nameLine && portraitTilt) {
-    nameLine.style.transform = `translate3d(${(pointer.sx * 10).toFixed(1)}px, ${(pointer.sy * 6).toFixed(1)}px, 0) rotateX(${(pointer.sy * -4).toFixed(2)}deg) rotateY(${(pointer.sx * 6).toFixed(2)}deg)`;
-    const idle = Math.sin(time * 0.0007) * 4;
-    portraitTilt.style.transform = `translate3d(${(pointer.sx * -14).toFixed(1)}px, ${(pointer.sy * -8 + idle).toFixed(1)}px, 0)`;
+  if (!reduce && nameLine && portraitTilt && heroStage) {
+    nameLine.style.transform = `translate3d(${(pointer.sx * 8).toFixed(1)}px, ${(pointer.sy * 4).toFixed(1)}px, 0)`;
+    const idle = Math.sin(time * 0.00055) * 3;
+    portraitTilt.style.transform = `translate3d(${(pointer.sx * -12).toFixed(1)}px, ${(pointer.sy * -6 + idle - progress * 36).toFixed(1)}px, 0)`;
+    heroStage.style.opacity = (1 - progress * 0.45).toFixed(3);
+    if (scrollCue) scrollCue.style.opacity = (1 - Math.min(1, progress * 2.5)).toFixed(3);
   }
   scene?.setPointer(pointer.sx, pointer.sy);
   scene?.setProgress(progress);
