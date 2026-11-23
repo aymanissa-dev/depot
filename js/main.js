@@ -221,15 +221,19 @@ async function bootScene() {
   const canvas = document.getElementById("hero-canvas");
   if (!canvas || reduce || navigator.connection?.saveData) {
     canvas?.remove();
+    document.documentElement.classList.add("no-webgl");
     return;
   }
   try {
     const { createHeroScene } = await import("./hero-scene.js");
     scene = createHeroScene(canvas, { lite: narrow() });
-    if (!scene) canvas.remove();
-    else scene.resize();
+    if (!scene) {
+      canvas.remove();
+      document.documentElement.classList.add("no-webgl");
+    } else scene.resize();
   } catch (err) {
     canvas.remove();
+    document.documentElement.classList.add("no-webgl");
   }
 }
 
@@ -245,7 +249,25 @@ function initScrollProgress() {
   });
 }
 
+function initTrail() {
+  if (!fine || reduce) return;
+  let last = 0;
+  window.addEventListener("pointermove", (event) => {
+    const now = performance.now();
+    if (now - last < 48) return;
+    last = now;
+    const petal = document.createElement("span");
+    petal.className = "trail-petal";
+    petal.setAttribute("aria-hidden", "true");
+    petal.style.left = `${event.clientX}px`;
+    petal.style.top = `${event.clientY}px`;
+    document.body.append(petal);
+    window.setTimeout(() => petal.remove(), 720);
+  });
+}
+
 document.getElementById("print-cv")?.addEventListener("click", () => window.print());
+initTrail();
 initHeader();
 initCursor();
 initCards();
